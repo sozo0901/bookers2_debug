@@ -36,6 +36,7 @@
         </tr>
       </table>
       <div>
+        <%= render 'layouts/errors', obj: @book_comment %>
         <% @book.book_comments.each do |book_comment| %>
           <%= link_to user_path(book_comment.user) do %>
             <%= attachment_image_tag(book_comment.user, :profile_image, :fill, 30, 30, fallback: "no-image-icon.jpg") %><br>
