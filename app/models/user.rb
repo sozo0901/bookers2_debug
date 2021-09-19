@@ -7,7 +7,17 @@ class User < ApplicationRecord
   has_many :books, dependent: :destroy
   has_many :book_comments, dependent: :destroy
   has_many :favorites, dependent: :destroy
-  
+
+  # フォローしている
+  has_many :follower, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
+  # フォローされている
+  has_many :followed, class_name: "Relationship", foreign_key: "followed_id", dependent: :destroy
+
+  # フォローしている人
+  has_many :follower_user, through: :followed, source: :follower
+  # フォローされている人
+  has_many :following_user, through: :follower, source: :followed
+
 
   attachment :profile_image, destroy: false
 
