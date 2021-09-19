@@ -18,9 +18,25 @@ class User < ApplicationRecord
   # フォローされている人
   has_many :following_user, through: :follower, source: :followed
 
+  # 1. followメソッド = フォローする
+  def follow(user_id)
+    follower.create(followed_id: user_id)
+  end
+
+  # 2. unfollowメソッド = フォローを外す
+  def unfollow(user_id)
+    follower.find_by(followed_id: user_id).destroy
+  end
+
+  # 3. followingメソッド = 既にフォローしているかの確認
+  def following?(user)
+    following_user.include?(user)
+  end
+
+
+
 
   attachment :profile_image, destroy: false
-
   validates :name, length: {maximum: 20, minimum: 2}, uniqueness: true
   validates :introduction, length: { maximum: 50 }
 end
