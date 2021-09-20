@@ -8,35 +8,31 @@ class User < ApplicationRecord
   has_many :book_comments, dependent: :destroy
   has_many :favorites, dependent: :destroy
 
-  # フォローしている
-  has_many :follower, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
-  # フォローされている
-  has_many :followed, class_name: "Relationship", foreign_key: "followed_id", dependent: :destroy
+  # 自分がフォローされる（被フォロー）側の関係性
+  has_many :reverse_of_relationships, class_name: "Relationship", foreign_key: "followed_id", dependent: :destroy
+  # 自分がフォローする（与フォロー）側の関係性
+  has_many :relationships, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
+  # 被フォロー関係を通じて参照→自分をフォローしている人
+  has_many :followers, through: :reverse_of_relationships, source: :follower
+  # 与フォロー関係を通じて参照→自分がフォローしている人
+  has_many :followings, through: :relationships, source: :followed
 
-  # フォローしている人
-  has_many :follower_user, through: :followed, source: :follower
-  # フォローされている人
-  has_many :following_user, through: :follower, source: :followed
-
-  # 1. followメソッド = フォローする
   def follow(user_id)
-    follower.create(followed_id: user_id)
+    relationships.create(followed_id: user_id)
   end
 
-  # 2. unfollowメソッド = フォローを外す
   def unfollow(user_id)
-    follower.find_by(followed_id: user_id).destroy
+    relationships.find_by(followed_id: user_id).destroy
   end
 
-  # 3. followingメソッド = 既にフォローしているかの確認
   def following?(user)
-    following_user.include?(user)
+    followings.include?(user)
   end
-
 
 
 
   attachment :profile_image, destroy: false
+  
   validates :name, length: {maximum: 20, minimum: 2}, uniqueness: true
   validates :introduction, length: { maximum: 50 }
 end
